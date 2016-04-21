@@ -1,0 +1,6 @@
+OUTPUT_FORMAT("binary");
+IPLBASE = 0x7c00;
+
+SECTIONS {
+    . = IPLBASE;
+}
