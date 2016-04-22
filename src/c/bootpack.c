@@ -1,5 +1,6 @@
 //#include "bootpack.h"
 //#include "hankaku.h"
+#include "graphics.h"
 //#include <stdio.h>
 //#include <stdarg.h>
 
@@ -13,17 +14,9 @@ void io_out8(int port,  int data);
 int io_load_eflags(void);
 void io_store_eflags(int eflags);
 
-void Main(void);
-void init_palette(void);
-void init_screen(char *vram, int x, int y);
-void set_palette(int start, int end, unsigned char *rgb);
-void boxfill8(unsigned char *vram, int xsize, unsigned char c, int x0, int y0, int x1, int y1);
-void putfont8(char *vram, int xsize, int x, int y, char c, char *font);
-void putfont8_asc(char *vram, int xsize, int x, int y, char c, unsigned char *s);
-void init_mouse_cursor8(char *mouse, char bc);
-void putblock8_8(char *vram, int vxsize, int pxsize,
-    int pysize, int px0, int py0, char *buf, int bxsize);
+int lsprintf(char *str, const char *fmt, ...);
 
+void Main(void);
 #define COL8_000000     0
 #define COL8_FF0000     1
 #define COL8_00FF00     2
@@ -40,7 +33,6 @@ void putblock8_8(char *vram, int vxsize, int pxsize,
 #define COL8_840084     13
 #define COL8_008484     14
 #define COL8_848484     15
-
 struct BOOTINFO{
     char cyls, leds, vmode, reserve;
     short scrnx, scrny;
@@ -51,14 +43,21 @@ void Main(void)
 
     struct BOOTINFO *binfo = (struct BOOTINFO *)0x0ff0;
     int num , mx, my, count;
-    char str[255], s[40], mcursor[256];
+    char s[40], mcursor[256];
     init_palette();
     init_screen(binfo->vram, binfo->scrnx, binfo->scrny);
     mx = (binfo->scrnx - 16)/2;
     my = (binfo->scrny -28 - 16)/2;
     init_mouse_cursor8(mcursor, COL8_008484);
+//    putfont8_asc(binfo->vram, binfo->scrnx, 8, 8, COL8_FF0000, "abc");
+//    putblock8_8(binfo->vram, binfo->scrnx, 16, 16, mx, my, mcursor, 16);
+    //lsprintf(s,"hoge = %x",mx);
+//    intToHex(s, 99);
+//    putfont8_asc(binfo->vram, binfo->scrnx, 30, 30, COL8_00FF00, s);
     putblock8_8(binfo->vram, binfo->scrnx, 16, 16, mx, my, mcursor, 16);
-    intToHex(s, mx);
+    putfont8_asc(binfo->vram, binfo->scrnx, 30, 30, COL8_00FF00, "Hello My OS!");
+
+//    intToHex(s, mx);
     for (;;) {
         io_hlt();
     }
@@ -412,28 +411,41 @@ int intToHex(char *str, int num){
 //}
 
 void init_mouse_cursor8(char *mouse, char bc){
+    char cursor2[128] = {
+             1, 1, 1, 1, 1, 1, 1, 1  ,  1, 1, 1, 1, 1, 1, 0, 0  ,
+             1, 1, 1, 1, 1, 1, 1, 1  ,  1, 1, 1, 1, 1, 0, 0, 0  ,
+             1, 1, 1, 1, 1, 1, 1, 1  ,  1, 1, 1, 1, 0, 0, 0, 0  ,
+             1, 1, 1, 1, 1, 1, 1, 1  ,  1, 1, 1, 0, 0, 0, 0, 0  ,
+
+             1, 1, 1, 1, 1, 1, 1, 1  ,  1, 1, 1, 1, 0, 0, 0, 0  ,
+             1, 1, 1, 1, 0, 1, 1, 1  ,  1, 1, 1, 1, 1, 1, 1, 1  ,
+             1, 1, 0, 0, 0, 0, 1, 1  ,  1, 1, 1, 1, 1, 1, 1, 1  ,
+             1, 0, 0, 0, 0, 0, 0, 1  ,  1, 1, 1, 1, 1, 1, 1, 1  ,
+    };
     static char cursor[16][16] = {
-        "**************..",
-        "*OOOOOOOOOOO*...",
-        "*OOOOOOOOOO*....",
-        "*OOOOOOOOO*.....",
-        "*OOOOOOOO*......",
-        "*OOOOOOO*.......",
-        "*OOOOOOO*.......",
-        "*OOOOOOOO*......",
-        "*OOOO**OOO*.....",
-        "*OOO*..*OOO*....",
-        "*OO*....*OOO*...",
-        "*O*......*OOO*..",
-        "**........*OOO*.",
-        "*..........*OOO*",
-        "............*OO*",
+        "**************..", 
+        "*OOOOOOOOOOO*...", 
+        "*OOOOOOOOOO*....", 
+        "*OOOOOOOOO*.....", 
+        "*OOOOOOOO*......", 
+        "*OOOOOOO*.......", 
+        "*OOOOOOO*.......", 
+        "*OOOOOOOO*......", 
+        "*OOOO**OOO*.....", 
+        "*OOO*..*OOO*....", 
+        "*OO*....*OOO*...", 
+        "*O*......*OOO*..", 
+        "**........*OOO*.", 
+        "*..........*OOO*", 
+        "............*OO*", 
         ".............***"
     };
-    int x, y;
-
-    for(y = 0;y < 16 ;y++){
-        for (x = 0; x < 16; x++) {
+    int x=0, y=0;
+    //for (; y < 16; y++) {
+        for (; x < 16*16; x++) {
+            //if (cursor[x] == 1) {
+            //    mouse[x] = COL8_FF0000;
+            //}else {mouse[y * 16 + x] = bc;}
             if (cursor[y][x] == '*') {
                 mouse[y * 16 + x] = COL8_000000;
             }
@@ -444,8 +456,9 @@ void init_mouse_cursor8(char *mouse, char bc){
                 mouse[y * 16 + x] = bc;
             }
         }
-    }
+    //}
 }
+//vram:画面 vxsize:画面サイズ pxsize:
 void putblock8_8(char *vram, int vxsize, int pxsize,
     int pysize, int px0, int py0, char *buf, int bxsize){
     int x,  y;
@@ -455,4 +468,28 @@ void putblock8_8(char *vram, int vxsize, int pxsize,
         }
     }
     return;
+}
+
+void strcls(char *str) {
+    while(*str != '\0') *str++ = '\0';
+}
+int lsprintf(char *str, const char *fmt, ...){
+    int *arg = (int *)(&str + 2);
+    int cnt, i, argc = 0;
+    char buf[20];
+    const char *p = fmt;
+
+    for (cnt = 0;*p != '\0'; p++){
+        if(*p == '%'){
+            strcls(buf);
+            if(p[1] == 'x'){
+                intToHex(buf, arg[argc++]);break;
+                for(i = 0;buf[i] != '\0';i++, cnt++) *str == buf[i];
+            }
+            p++;
+        }else{
+            *str++ = *p;cnt++;
+        }
+    }
+    return cnt;
 }
