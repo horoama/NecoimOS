@@ -24,8 +24,10 @@ $(OSSYS) : $(ASRC)/head.s $(ASRC)/func.s $(CSRC)/bootpack.c
 	#gcc -Tlnk.ls -c -g -Wa,-a,-ad $(ASRC)/head.s > asmhead.ls
 	#as   --32 $(ASRC)/font.s -o $(OBJ)/font.o
 	gcc  -m32 $(CSRC)/bootpack.c  $(BINOPT) -c -o $(OBJ)/boot.o
+	gcc  -m32 $(CSRC)/printf.c  $(BINOPT) -c -o $(OBJ)/printf.o
+	gcc  -m32 $(CSRC)/graphics.c  $(BINOPT) -c -o $(OBJ)/graphics.o
 	as    --32 $(ASRC)/func.s -o $(OBJ)/func.o
-	ld    -m elf_i386 -T$(LS)/main.ls -e Main --oformat=binary -o $(OBJ)/boot.bin $(OBJ)/boot.o $(OBJ)/func.o
+	ld    -m elf_i386 -T$(LS)/main.ls -e Main --oformat=binary -o $(OBJ)/boot.bin $(OBJ)/boot.o $(OBJ)/func.o $(OBJ)/printf.o $(OBJ)/graphics.o
 	cat $(OBJ)/asmhead.bin $(OBJ)/boot.bin > $(OSSYS)
 
 $(IPL) : $(ASRC)/ipl.s
