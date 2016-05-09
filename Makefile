@@ -1,5 +1,6 @@
 OSNAME=os
 
+#directory
 ASRC=./src/asm
 CSRC=./src/c
 SRC=./src
@@ -14,21 +15,32 @@ BOOTPAK=$(OBJ)/boot.bin
 BINOPT=-nostdlib -Wl,--oformat=binary
 QEMUOPT=-m 32 -localtime -vga std -fda
 
+CSRC_FILES := boot.c printf.c graphics.c
+CSRC_PATH := $(foreach file, $(CSRC_FILES), $(SRC)/c/$(file))
+OBJECTS := $(foreach file, $(patsubst %.c,%.o,$(CSRC_FILES)), $(OBJ)/$(file))
+
+
 $(IMG) : $(OSSYS) $(IPL)
 	mformat -f 1440 -C -B $(IPL) -i $(IMG) ::
 	mcopy $(OSSYS) -i $(IMG) ::
 
-$(OSSYS) : $(ASRC)/head.s $(ASRC)/func.s $(CSRC)/bootpack.c
+$(OSSYS) : $(ASRC)/head.s $(ASRC)/func.s $(OBJECTS)
 	#as   --32  $(ASRC)/head.s -o $(OBJ)/asmhead.bin
 	gcc  -m32 $(ASRC)/head.s -nostdlib -T$(LS)/asmhead.ls -o $(OBJ)/asmhead.bin
 	#gcc -Tlnk.ls -c -g -Wa,-a,-ad $(ASRC)/head.s > asmhead.ls
 	#as   --32 $(ASRC)/font.s -o $(OBJ)/font.o
-	gcc  -m32 $(CSRC)/bootpack.c  $(BINOPT) -c -o $(OBJ)/boot.o
-	gcc  -m32 $(CSRC)/printf.c  $(BINOPT) -c -o $(OBJ)/printf.o
-	gcc  -m32 $(CSRC)/graphics.c  $(BINOPT) -c -o $(OBJ)/graphics.o
 	as    --32 $(ASRC)/func.s -o $(OBJ)/func.o
-	ld    -m elf_i386 -T$(LS)/main.ls -e Main --oformat=binary -o $(OBJ)/boot.bin $(OBJ)/boot.o $(OBJ)/func.o $(OBJ)/printf.o $(OBJ)/graphics.o
+	ld    -m elf_i386 -T$(LS)/main.ls -e Main --oformat=binary -o $(OBJ)/boot.bin $(OBJECTS) $(OBJ)/func.o
 	cat $(OBJ)/asmhead.bin $(OBJ)/boot.bin > $(OSSYS)
+
+$(OBJ)/boot.o : $(CSRC)/bootpack.c
+	gcc  -m32 $(CSRC)/bootpack.c  $(BINOPT) -c -o $(OBJ)/boot.o
+
+$(OBJ)/printf.o : $(CSRC)/printf.c
+	gcc  -m32 $(CSRC)/printf.c  $(BINOPT) -c -o $(OBJ)/printf.o
+
+$(OBJ)/graphics.o : $(CSRC)/graphics.c
+	gcc  -m32 $(CSRC)/graphics.c  $(BINOPT) -c -o $(OBJ)/graphics.o
 
 $(IPL) : $(ASRC)/ipl.s
 	gcc $(ASRC)/ipl.s -nostdlib -T$(LS)/ipl.ls -o $(IPL)
