@@ -15,7 +15,7 @@ BOOTPAK=$(OBJ)/boot.bin
 BINOPT=-nostdlib -Wl,--oformat=binary
 QEMUOPT=-m 32 -localtime -vga std -fda
 
-CSRC_FILES := boot.c printf.c graphics.c
+CSRC_FILES := boot.c printf.c graphics.c dsctbl.c
 CSRC_PATH := $(foreach file, $(CSRC_FILES), $(SRC)/c/$(file))
 OBJECTS := $(foreach file, $(patsubst %.c,%.o,$(CSRC_FILES)), $(OBJ)/$(file))
 
@@ -45,6 +45,11 @@ $(OBJ)/graphics.o : $(CSRC)/graphics.c
 $(IPL) : $(ASRC)/ipl.s
 	gcc $(ASRC)/ipl.s -nostdlib -T$(LS)/ipl.ls -o $(IPL)
 	#gcc -Tlnk.ls -c -g -Wa,-a,-ad $(ASRC)/ipl.s > ipl.ls
+
+$(OBJ)/dsctbl.o : $(CSRC)/dsctbl.c
+	gcc  -m32 $(CSRC)/dsctbl.c  $(BINOPT) -c -o $(OBJ)/dsctbl.o
+
+
 
 #$(BOOTPAK) : boot.o func.o font.o
 #	ld -Tmain.ls -m elf_i386 -o $@ $^

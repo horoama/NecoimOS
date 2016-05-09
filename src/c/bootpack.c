@@ -2,6 +2,7 @@
 //#include "hankaku.h"
 #include "printf.h"
 #include "graphics.h"
+#include "dsctbl.h"
 //#include <stdio.h>
 //#include <stdarg.h>
 
@@ -26,18 +27,16 @@ void Main(void)
     int num , mx, my, count;
     char s[40], mcursor[256];
     init_palette();
+	init_gdtidt();
+
     init_screen(binfo->vram, binfo->scrnx, binfo->scrny);
     mx = (binfo->scrnx - 16)/2;
     my = (binfo->scrny -28 - 16)/2;
     init_mouse_cursor8(mcursor, COL8_008484);
-//    putfont8_asc(binfo->vram, binfo->scrnx, 8, 8, COL8_FF0000, "abc");
-//    putblock8_8(binfo->vram, binfo->scrnx, 16, 16, mx, my, mcursor, 16);
     lsprintf(s,"hoge = %x.%x",10, 255);
     putfont8_asc(binfo->vram, binfo->scrnx, 30, 30, COL8_00FF00, s);
     putblock8_8(binfo->vram, binfo->scrnx, 16, 16, mx, my, mcursor, 16);
-    //putfont8_asc(binfo->vram, binfo->scrnx, 30, 30, COL8_00FF00, "Hello My OS!");
 
-//    intToHex(s, mx);
     for (;;) {
         io_hlt();
     }

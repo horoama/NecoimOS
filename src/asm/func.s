@@ -7,7 +7,7 @@
 .globl io_in8,  io_in16,  io_in32
 .globl io_out8,  io_out16,  io_out32
 .globl io_load_eflags,  io_store_eflags
-
+.globl load_idtr, load_gdtr
 
 .text
 write_mem8:
@@ -79,4 +79,13 @@ io_store_eflags:	# void io_store_eflags(int eflags)#
    	push	eax
    	popf		# pop eflags ?ƃ????ӗ?
    	ret
-
+load_gdtr:
+    mov ax, [esp+4]
+    mov [esp+6], ax
+    lgdt [esp+6]
+    ret
+load_idtr:
+    mov ax, [esp+4]
+    mov [esp+6], ax
+    lidt [esp+6]
+    ret

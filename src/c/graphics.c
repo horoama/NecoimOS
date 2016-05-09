@@ -1,3 +1,4 @@
+#include "bootpack.h"
 #include "graphics.h"
 
 void init_palette(void)
