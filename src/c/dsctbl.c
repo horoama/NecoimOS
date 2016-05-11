@@ -1,15 +1,6 @@
 #include "bootpack.h"
 #include "dsctbl.h"
-
-#define ADR_IDT         0x0026f800
-#define LIMIT_IDT       0x000007ff
-#define ADR_GDT         0x00270000
-#define LIMIT_GDT       0x0000ffff
-#define ADR_BOTPAK      0x00280000
-#define LIMIT_BOTPAK    0x0007ffff
-#define AR_DATA32_RW    0x4092
-#define AR_CODE32_ER    0x409a
-#define AR_INTGATE32    0x008e
+#include "int.h"
 
 void init_gdtidt(void){
     struct SEGMENT_DESCRIPTOR *gdt = (struct SEGMENT_DESCRIPTOR *) ADR_GDT;
@@ -20,15 +11,19 @@ void init_gdtidt(void){
     for(i = 0; i< 8192; i++){
         set_segmdesc(gdt + i, 0, 0, 0);
     }
-    set_segmdesc(gdt + 1, 0xffffffff, 0x00000000, 0x4092);
-    set_segmdesc(gdt + 2, 0x0007ffff, 0x00280000, 0x409a);
+    set_segmdesc(gdt + 1, 0xffffffff, 0x00000000, AR_DATA32_RW);
+    set_segmdesc(gdt + 2, 0x0007ffff, 0x00280000, AR_CODE32_ER);
+    set_segmdesc(gdt + 3, 0xffffffff, 0x00000000, AR_CODE32_ER);
     load_gdtr(0x7fff, 0x00270000);
 
     //IDT
     for(i = 0;i < 256;i++){
-        set_segmdesc( idt + i ,  0, 0, 0);
+        set_gatedesc( idt + i ,  0, 0, 0);
     }
     load_idtr(0x7ff, 0x0026f800);
+
+    set_gatedesc(idt + 0x21,  (int)asm_inthandler21,  3 * 8,  AR_INTGATE32);
+    set_gatedesc(idt + 0x2c,  (int)asm_inthandler21,  3 * 8,  AR_INTGATE32);
 
     return;
 }

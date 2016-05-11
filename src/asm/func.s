@@ -8,6 +8,7 @@
 .globl io_out8,  io_out16,  io_out32
 .globl io_load_eflags,  io_store_eflags
 .globl load_idtr, load_gdtr
+.globl asm_inthandler21
 
 .text
 write_mem8:
@@ -89,3 +90,17 @@ load_idtr:
     mov [esp+6], ax
     lidt [esp+6]
     ret
+    iret
+asm_inthandler21:
+    push es
+    push ds
+    pusha
+    mov eax, esp
+    mov ds, ax
+    mov es, ax
+    call inthandler21
+    pop eax
+    popa
+    pop ds
+    pop es
+    iretd
