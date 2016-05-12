@@ -28,6 +28,7 @@ int lsprintf(char *str, const char *fmt, ...){
         }else{
             *str++ = *p;cnt++;
         }
+        *str = '\0';
     }
     return cnt;
 }
