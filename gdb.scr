@@ -1,1 +1,5 @@
 target remote localhost:1234
+b *0x002850d9
+b *0x00284ff3
+b *0xc200
+
