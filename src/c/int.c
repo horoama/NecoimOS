@@ -1,5 +1,6 @@
 #include "bootpack.h"
 #include "int.h"
+#include "printf.h"
 #include "graphics.h"
 #include "dsctbl.h"
 
@@ -29,10 +30,11 @@ void init_pic(void)
 void inthandler21(int *esp)
 {
     struct BOOTINFO *binfo = (struct BOOTINFO *) ADR_BOOTINFO;
-    unsigned char data,  s[4];
-
+    unsigned char data,  s[32];
+    io_out8(PIC0_OCW2,  0x61);
+    data = io_in8(PORT_KEYDAT);
+    lsprintf(s,"keyboard is %x",data);
     boxfill8(binfo->vram,  binfo->scrnx,  COL8_008484,  0,  16,  15,  31);
-    putfont8_asc(binfo->vram,  binfo->scrnx,  0,  16,  COL8_FFFFFF,  "intr");
-
+    putfont8_asc(binfo->vram,  binfo->scrnx,  0,  16,  COL8_FFFFFF,  s);
     return ;
 }

@@ -30,8 +30,6 @@ void Main(void)
     mx = (binfo->scrnx - 16)/2;
     my = (binfo->scrny -28 - 16)/2;
     init_mouse_cursor8(mcursor, COL8_008484);
-    lsprintf(s,"hoge = %x.%x",10, 255);
-    putfont8_asc(binfo->vram, binfo->scrnx, 30, 30, COL8_00FF00, s);
     putblock8_8(binfo->vram, binfo->scrnx, 16, 16, mx, my, mcursor, 16);
 
     io_out8(PIC0_IMR,  0xf9);    // PIC1とキーボードを許可
