@@ -11,6 +11,7 @@ extern void io_sti(void);
 extern void io_cli(void);
 extern void load_gdtr(int limit, int addr);
 extern void load_idtr(int limit, int addr);
+extern void io_stihlt(void);
 #define ADR_BOOTINFO    0x00000ff0
 struct BOOTINFO{
     char cyls,  leds,  vmode,  reserve;
