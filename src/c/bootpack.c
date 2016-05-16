@@ -38,7 +38,7 @@ void Main(void)
     struct BOOTINFO *binfo = (struct BOOTINFO *)ADR_BOOTINFO;
     int num , mx, my, count, i;
     char s[40], mcursor[256];
-    char keybuf[40];
+    char keybuf[32];
 	init_gdtidt();
 	init_pic();
     io_sti();
@@ -62,7 +62,7 @@ void Main(void)
             i = fifo8_get(&keyfifo);
             init_screen(binfo->vram, binfo->scrnx, binfo->scrny);
             io_sti();
-            lsprintf(s, "%x",  i);
+            lsprintf(s, "[%x]",  i);
             putfont8_asc(binfo->vram,  binfo->scrnx,  0,  16,  COL8_FFFFFF,  s);
         }
     }
@@ -79,10 +79,10 @@ void wait_KBC_sendready(void)
 {
     /* Waiting for keyboard get ready */
     for (;;) {
-            if ((io_in8(PORT_KEYSTA) & KEYSTA_SEND_NOTREADY) == 0) {
-                        break;
-                    }
+        if ((io_in8(PORT_KEYSTA) & KEYSTA_SEND_NOTREADY) == 0) {
+            break;
         }
+    }
     return;
 }
 void enable_mouse(void)

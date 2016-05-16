@@ -18,12 +18,12 @@ int fifo8_put(struct FIFO8 *fifo,  unsigned char data)
             /* no free space */
             fifo->flags |= FLAGS_OVERRUN;
             return -1;
-        }
+    }
     fifo->buf[fifo->p] = data;
-        fifo->p++;
-            if (fifo->p == fifo->size) {
-                    fifo->p = 0;
-                }
+    fifo->p++;
+    if (fifo->p == fifo->size) {
+        fifo->p = 0;
+    }
     fifo->free--;
     return 0;
 }
@@ -31,9 +31,9 @@ int fifo8_get(struct FIFO8 *fifo)
 {
     int data;
     if (fifo->free == fifo->size) {
-            /* FIFO is empty*/
-            return -1;
-        }
+        /* FIFO is empty*/
+        return -1;
+    }
     data = fifo->buf[fifo->q];
     fifo->q++;
     if (fifo->q == fifo->size) {
