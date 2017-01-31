@@ -9,7 +9,9 @@
 .globl io_load_eflags,  io_store_eflags
 .globl load_idtr, load_gdtr
 .globl asm_inthandler21
+.globl asm_inthandler2c
 .extern inthandler21
+.extern inthandler2c
 
 .text
 write_mem8:
@@ -102,6 +104,21 @@ asm_inthandler21:
     mov ds, ax
     mov es, ax
     call inthandler21
+    pop eax
+    popa
+    pop ds
+    pop es
+    iret
+asm_inthandler2c:
+    push es
+    push ds
+    pusha
+    mov eax, esp
+    push eax
+    mov ax, ss
+    mov ds, ax
+    mov es, ax
+    call inthandler2c
     pop eax
     popa
     pop ds

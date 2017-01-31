@@ -32,6 +32,7 @@ int io_load_eflags(void);
 void io_store_eflags(int eflags);
 
 extern struct FIFO8 keyfifo;
+extern struct FIFO8 mousefifo;
 void Main(void)
 {
 
@@ -39,31 +40,46 @@ void Main(void)
     int num , mx, my, count, i;
     char s[40], mcursor[256];
     char keybuf[32];
+    char mousebuf[128];
 	init_gdtidt();
 	init_pic();
     io_sti();
 
+    init_keyboard();
     init_palette();
+
     init_screen(binfo->vram, binfo->scrnx, binfo->scrny);
     mx = (binfo->scrnx - 16)/2;
     my = (binfo->scrny -28 - 16)/2;
     init_mouse_cursor8(mcursor, COL8_008484);
     putblock8_8(binfo->vram, binfo->scrnx, 16, 16, mx, my, mcursor, 16);
 
+    fifo8_init(&keyfifo, 32,  keybuf);
+    fifo8_init(&mousefifo, 32, mousebuf);
     io_out8(PIC0_IMR,  0xf9);    // PIC1とキーボードを許可
     io_out8(PIC1_IMR,  0xef);    // マウスを許可))
 
-    fifo8_init(&keyfifo, 32,  keybuf);
+    enable_mouse();
+
     for (;;) {
         io_cli();
-        if (fifo8_status(&keyfifo) == 0){
+        if (fifo8_status(&keyfifo) + fifo8_status(&mousefifo) == 0){
             io_stihlt();
         }else{
-            i = fifo8_get(&keyfifo);
-            init_screen(binfo->vram, binfo->scrnx, binfo->scrny);
-            io_sti();
-            lsprintf(s, "[%x]",  i);
-            putfont8_asc(binfo->vram,  binfo->scrnx,  0,  16,  COL8_FFFFFF,  s);
+            if(fifo8_status(&mousefifo) != 0){
+                i = fifo8_get(&mousefifo);
+                init_screen(binfo->vram, binfo->scrnx, binfo->scrny);
+                io_sti();
+                lsprintf(s, "[%x]",  i);
+                putfont8_asc(binfo->vram,  binfo->scrnx,  0,  86,  COL8_FFFFFF,  s);
+            }else if (fifo8_status(&keyfifo) != 0){
+                i = fifo8_get(&keyfifo);
+                init_screen(binfo->vram, binfo->scrnx, binfo->scrny);
+                io_sti();
+                lsprintf(s, "[%x]",  i);
+                putfont8_asc(binfo->vram,  binfo->scrnx,  0,  16,  COL8_FFFFFF,  s);
+            }
+
         }
     }
 }

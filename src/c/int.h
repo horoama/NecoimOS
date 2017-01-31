@@ -1,6 +1,8 @@
 void init_pic(void);
 void inthandler21(int *esp);
+void inthandler2c(int *esp);
 extern void asm_inthandler21(void);
+extern void asm_inthandler2c(void);
 #define PIC0_ICW1       0x0020
 #define PIC0_OCW2       0x0020
 #define PIC0_IMR        0x0021
